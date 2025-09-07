@@ -19,11 +19,6 @@
       "dest": "frontend/dist/$1"
     }
   ],
-  "functions": {
-    "backend/src/index.ts": {
-      "maxDuration": 30
-    }
-  },
   "env": {
     "NODE_ENV": "production"
   }
