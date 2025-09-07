@@ -73,7 +73,29 @@ npm test
 ```
 
 ## デプロイ
-Vercel を使用してデプロイします。
+
+### Vercel へのデプロイ
+
+1. **GitHubリポジトリをVercelにインポート**
+   - Vercelダッシュボードで「New Project」
+   - GitHubリポジトリを選択
+   - フレームワーク: Other
+   - Root Directory: `frontend`
+
+2. **環境変数の設定**
+   ```
+   DATABASE_URL=your_postgres_connection_string
+   FRONTEND_URL=https://your-app.vercel.app
+   NODE_ENV=production
+   ```
+
+3. **データベースのセットアップ**
+   - Vercel Postgresを追加
+   - 接続文字列を環境変数に設定
+
+4. **デプロイ**
+   - 「Deploy」ボタンをクリック
+   - ビルドが完了するまで待機
 
 ## ライセンス
 MIT
