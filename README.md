@@ -11,8 +11,8 @@
 
 ## ディレクトリ構造
 ```
-├── frontend/          # React フロントエンド
-├── backend/           # Express バックエンド
+├── src/              # React フロントエンド
+├── backend/          # Express バックエンド
 ├── docs/             # ドキュメント
 └── package.json      # ルート設定
 ```
@@ -28,11 +28,11 @@ npm install
 ```bash
 # backend/.env
 DATABASE_URL=your_postgres_connection_string
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app
 PORT=3001
 
-# frontend/.env.local
-REACT_APP_API_URL=http://localhost:3001/api
+# .env.local
+VITE_API_URL=https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app/api
 ```
 
 ### 3. データベースセットアップ
@@ -64,12 +64,10 @@ npm run dev
 ## テスト
 ```bash
 # フロントエンドテスト
-cd frontend
 npm test
 
 # バックエンドテスト
-cd backend
-npm test
+npm run test:backend
 ```
 
 ## デプロイ
@@ -79,13 +77,13 @@ npm test
 1. **GitHubリポジトリをVercelにインポート**
    - Vercelダッシュボードで「New Project」
    - GitHubリポジトリを選択
-   - フレームワーク: Other
-   - Root Directory: `frontend`
+   - フレームワーク: Vite
+   - Root Directory: `/` (ルート)
 
 2. **環境変数の設定**
    ```
    DATABASE_URL=your_postgres_connection_string
-   FRONTEND_URL=https://your-app.vercel.app
+   FRONTEND_URL=https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app
    NODE_ENV=production
    ```
 
