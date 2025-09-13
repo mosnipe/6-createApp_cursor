@@ -3,9 +3,16 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 // データベース接続の簡易実装
 const createDatabaseConnection = () => {
   const { Pool } = require('pg');
+  
+  // 環境変数の確認
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+  
+  // Prisma Accelerateを使用する場合は、通常のPostgreSQL接続を使用
   return new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: { rejectUnauthorized: false }, // Prisma Accelerateは常にSSLが必要
   });
 };
 
@@ -22,8 +29,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { method, url } = req;
   const path = url?.replace('/api', '') || '';
 
+  let pool: any = null;
+
   try {
-    const pool = createDatabaseConnection();
+    // データベース接続の確認
+    pool = createDatabaseConnection();
+    
+    // 接続テスト
+    await pool.query('SELECT 1');
 
     // イベント一覧取得
     if (method === 'GET' && path === '/events') {
@@ -192,15 +205,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ message: 'Texts reordered successfully' });
     }
 
-    await pool.end();
+    if (pool) await pool.end();
     // 404エラー
     return res.status(404).json({ error: 'API endpoint not found' });
 
   } catch (error) {
     console.error('API Error:', error);
+    
+    // データベース接続を確実に閉じる
+    if (pool) {
+      try {
+        await pool.end();
+      } catch (closeError) {
+        console.error('Error closing database connection:', closeError);
+      }
+    }
+    
     return res.status(500).json({ 
       error: 'Internal server error',
-      details: error.message 
+      details: error.message,
+      type: error.name
     });
   }
 }
