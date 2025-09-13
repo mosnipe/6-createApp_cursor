@@ -13,7 +13,7 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-powerproke-blue to-powerproke-purple flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-powerproke-blue to-powerproke-purple flex items-center justify-center pt-20">
       <div className="bg-white rounded-2xl shadow-2xl p-12 max-w-md w-full mx-4">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-800 mb-2 font-game">

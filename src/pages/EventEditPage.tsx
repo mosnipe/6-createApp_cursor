@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch, fetchEvent, updateEvent } from '../store';
+import { RootState, AppDispatch, fetchEvent, updateEvent, setPreviewMode } from '../store';
 import TextEditor from '../components/TextEditor';
 import ImageSettings from '../components/ImageSettings';
 import PreviewPanel from '../components/PreviewPanel';
@@ -125,7 +125,7 @@ const EventEditPage: React.FC = () => {
             
             <div className="flex items-center space-x-3">
               <button
-                onClick={() => dispatch({ type: 'ui/setPreviewMode', payload: !previewMode })}
+                onClick={() => dispatch(setPreviewMode(!previewMode))}
                 className={`px-4 py-2 rounded ${
                   previewMode 
                     ? 'bg-powerproke-purple text-white' 

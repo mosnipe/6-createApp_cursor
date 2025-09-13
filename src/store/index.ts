@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction, configureStore } from '@reduxjs/toolkit';
-import { Event, TextItem, Character } from '../types';
+import { Event, TextItem, Character, UpdateEventRequest, CreateTextRequest, UpdateTextRequest } from '../types';
 import { eventService, textService } from '../services/api';
 
 // イベント一覧の状態
@@ -57,7 +57,7 @@ export const createEvent = createAsyncThunk(
 
 export const updateEvent = createAsyncThunk(
   'currentEvent/updateEvent',
-  async ({ id, eventData }: { id: string; eventData: any }) => {
+  async ({ id, eventData }: { id: string; eventData: UpdateEventRequest }) => {
     const event = await eventService.updateEvent(id, eventData);
     return event;
   }
@@ -65,7 +65,7 @@ export const updateEvent = createAsyncThunk(
 
 export const createText = createAsyncThunk(
   'currentEvent/createText',
-  async ({ eventId, textData }: { eventId: string; textData: any }) => {
+  async ({ eventId, textData }: { eventId: string; textData: CreateTextRequest }) => {
     const text = await textService.createText(eventId, textData);
     return text;
   }
@@ -73,7 +73,7 @@ export const createText = createAsyncThunk(
 
 export const updateText = createAsyncThunk(
   'currentEvent/updateText',
-  async ({ id, textData }: { id: string; textData: any }) => {
+  async ({ id, textData }: { id: string; textData: UpdateTextRequest }) => {
     const text = await textService.updateText(id, textData);
     return text;
   }
@@ -122,8 +122,17 @@ const eventsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch events';
       })
+      .addCase(createEvent.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createEvent.fulfilled, (state, action) => {
+        state.loading = false;
         state.list.push(action.payload);
+      })
+      .addCase(createEvent.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to create event';
       });
   },
 });
@@ -176,12 +185,26 @@ const currentEventSlice = createSlice({
       .addCase(updateEvent.fulfilled, (state, action) => {
         state.event = action.payload;
       })
+      .addCase(createText.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createText.fulfilled, (state, action) => {
+        state.loading = false;
         if (state.event) {
           state.event.texts.push(action.payload);
         }
       })
+      .addCase(createText.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to create text';
+      })
+      .addCase(updateText.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updateText.fulfilled, (state, action) => {
+        state.loading = false;
         if (state.event) {
           const index = state.event.texts.findIndex(text => text.id === action.payload.id);
           if (index !== -1) {
@@ -189,10 +212,34 @@ const currentEventSlice = createSlice({
           }
         }
       })
+      .addCase(updateText.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to update text';
+      })
+      .addCase(deleteText.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(deleteText.fulfilled, (state, action) => {
+        state.loading = false;
         if (state.event) {
           state.event.texts = state.event.texts.filter(text => text.id !== action.payload);
         }
+      })
+      .addCase(deleteText.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to delete text';
+      })
+      .addCase(reorderTexts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(reorderTexts.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(reorderTexts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to reorder texts';
       });
   },
 });
