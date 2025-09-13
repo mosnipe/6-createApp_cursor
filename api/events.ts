@@ -8,10 +8,15 @@ const createDatabaseConnection = () => {
     throw new Error('DATABASE_URL environment variable is not set');
   }
   
+  console.log('DATABASE_URL is set:', !!process.env.DATABASE_URL);
+  
   // Prisma Accelerateを使用する場合は、通常のPostgreSQL接続を使用
   return new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }, // Prisma Accelerateは常にSSLが必要
+    max: 1, // Vercel Functionsでは接続数を制限
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
   });
 };
 
@@ -31,11 +36,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let pool: any = null;
 
   try {
+    console.log('Starting API request:', { method, path });
+    
     // データベース接続の確認
     pool = createDatabaseConnection();
     
     // 接続テスト
+    console.log('Testing database connection...');
     await pool.query('SELECT 1');
+    console.log('Database connection successful');
+
+    // デバッグエンドポイント
+    if (method === 'GET' && path === '/debug') {
+      const debugInfo = {
+        timestamp: new Date().toISOString(),
+        environment: {
+          NODE_ENV: process.env.NODE_ENV,
+          DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT SET',
+        },
+        database: {
+          connection: 'testing...'
+        }
+      };
+
+      try {
+        const result = await pool.query('SELECT 1 as test');
+        debugInfo.database.connection = 'SUCCESS';
+        debugInfo.database.testResult = result.rows[0];
+      } catch (dbError: any) {
+        debugInfo.database.connection = 'FAILED';
+        debugInfo.database.error = dbError.message;
+      }
+
+      await pool.end();
+      return res.status(200).json(debugInfo);
+    }
 
     // イベント一覧取得
     if (method === 'GET' && path === '/events') {
@@ -334,8 +369,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 404エラー
     return res.status(404).json({ error: 'API endpoint not found' });
 
-  } catch (error) {
-    console.error('API Error:', error);
+  } catch (error: any) {
+    console.error('API Error Details:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      detail: error.detail,
+      hint: error.hint,
+      position: error.position,
+      internalPosition: error.internalPosition,
+      internalQuery: error.internalQuery,
+      where: error.where,
+      schema: error.schema,
+      table: error.table,
+      column: error.column,
+      dataType: error.dataType,
+      constraint: error.constraint,
+      file: error.file,
+      line: error.line,
+      routine: error.routine
+    });
     
     // データベース接続を確実に閉じる
     if (pool) {
@@ -349,7 +402,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ 
       error: 'Internal server error',
       details: error.message,
-      type: error.name
+      type: error.name,
+      code: error.code
     });
   }
 }
