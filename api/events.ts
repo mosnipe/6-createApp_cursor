@@ -39,9 +39,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // イベント一覧取得
     if (method === 'GET' && path === '/events') {
-      const result = await pool.query('SELECT * FROM events ORDER BY created_at DESC');
+      const result = await pool.query(`
+        SELECT 
+          e.*,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', t.id,
+                'content', t.content,
+                'order', t.order_index,
+                'characterId', t.character_id,
+                'imageId', t.image_id
+              ) ORDER BY t.order_index
+            ) FILTER (WHERE t.id IS NOT NULL), 
+            '[]'::json
+          ) as texts,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', c.id,
+                'name', c.name,
+                'imageUrl', c.image_url,
+                'position', c.position
+              ) ORDER BY c.created_at
+            ) FILTER (WHERE c.id IS NOT NULL), 
+            '[]'::json
+          ) as characters
+        FROM events e
+        LEFT JOIN texts t ON e.id = t.event_id
+        LEFT JOIN characters c ON e.id = c.event_id
+        GROUP BY e.id
+        ORDER BY e.created_at DESC
+      `);
+      
+      // レスポンス形式をフロントエンドに合わせる
+      const events = result.rows.map(row => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        backgroundImage: row.background_image_id,
+        texts: row.texts || [],
+        characters: row.characters || []
+      }));
+      
       await pool.end();
-      return res.status(200).json(result.rows);
+      return res.status(200).json(events);
     }
 
     // イベント作成
@@ -58,17 +102,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         [title, description || '']
       );
 
+      // レスポンス形式をフロントエンドに合わせる
+      const event = {
+        id: result.rows[0].id,
+        title: result.rows[0].title,
+        description: result.rows[0].description,
+        createdAt: result.rows[0].created_at,
+        updatedAt: result.rows[0].updated_at,
+        backgroundImage: result.rows[0].background_image_id,
+        texts: [],
+        characters: []
+      };
+
       await pool.end();
-      return res.status(201).json(result.rows[0]);
+      return res.status(201).json(event);
     }
 
     // イベント取得
     if (method === 'GET' && path.startsWith('/events/')) {
       const eventId = path.split('/')[2];
-      const result = await pool.query(
-        'SELECT * FROM events WHERE id = $1',
-        [eventId]
-      );
+      const result = await pool.query(`
+        SELECT 
+          e.*,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', t.id,
+                'content', t.content,
+                'order', t.order_index,
+                'characterId', t.character_id,
+                'imageId', t.image_id
+              ) ORDER BY t.order_index
+            ) FILTER (WHERE t.id IS NOT NULL), 
+            '[]'::json
+          ) as texts,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', c.id,
+                'name', c.name,
+                'imageUrl', c.image_url,
+                'position', c.position
+              ) ORDER BY c.created_at
+            ) FILTER (WHERE c.id IS NOT NULL), 
+            '[]'::json
+          ) as characters
+        FROM events e
+        LEFT JOIN texts t ON e.id = t.event_id
+        LEFT JOIN characters c ON e.id = c.event_id
+        WHERE e.id = $1
+        GROUP BY e.id
+      `, [eventId]);
 
       await pool.end();
 
@@ -76,7 +160,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(404).json({ error: 'Event not found' });
       }
 
-      return res.status(200).json(result.rows[0]);
+      // レスポンス形式をフロントエンドに合わせる
+      const event = {
+        id: result.rows[0].id,
+        title: result.rows[0].title,
+        description: result.rows[0].description,
+        createdAt: result.rows[0].created_at,
+        updatedAt: result.rows[0].updated_at,
+        backgroundImage: result.rows[0].background_image_id,
+        texts: result.rows[0].texts || [],
+        characters: result.rows[0].characters || []
+      };
+
+      return res.status(200).json(event);
     }
 
     // イベント更新
@@ -95,7 +191,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(404).json({ error: 'Event not found' });
       }
 
-      return res.status(200).json(result.rows[0]);
+      // レスポンス形式をフロントエンドに合わせる
+      const event = {
+        id: result.rows[0].id,
+        title: result.rows[0].title,
+        description: result.rows[0].description,
+        createdAt: result.rows[0].created_at,
+        updatedAt: result.rows[0].updated_at,
+        backgroundImage: result.rows[0].background_image_id,
+        texts: [],
+        characters: []
+      };
+
+      return res.status(200).json(event);
     }
 
     // イベント削除
@@ -131,7 +239,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // テキスト作成
     if (method === 'POST' && path.startsWith('/events/') && path.endsWith('/texts')) {
       const eventId = path.split('/')[2];
-      const { content, order_index } = req.body;
+      const { content, order } = req.body;
 
       if (!content) {
         await pool.end();
@@ -140,21 +248,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const result = await pool.query(
         'INSERT INTO texts (event_id, content, order_index) VALUES ($1, $2, $3) RETURNING *',
-        [eventId, content, order_index || 0]
+        [eventId, content, order || 0]
       );
 
+      // レスポンス形式をフロントエンドに合わせる
+      const text = {
+        id: result.rows[0].id,
+        content: result.rows[0].content,
+        order: result.rows[0].order_index,
+        characterId: result.rows[0].character_id,
+        imageId: result.rows[0].image_id
+      };
+
       await pool.end();
-      return res.status(201).json(result.rows[0]);
+      return res.status(201).json(text);
     }
 
     // テキスト更新
     if (method === 'PUT' && path.startsWith('/texts/')) {
       const textId = path.split('/')[2];
-      const { content, order_index } = req.body;
+      const { content, order } = req.body;
 
       const result = await pool.query(
         'UPDATE texts SET content = $1, order_index = $2 WHERE id = $3 RETURNING *',
-        [content, order_index, textId]
+        [content, order, textId]
       );
 
       await pool.end();
@@ -163,7 +280,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(404).json({ error: 'Text not found' });
       }
 
-      return res.status(200).json(result.rows[0]);
+      // レスポンス形式をフロントエンドに合わせる
+      const text = {
+        id: result.rows[0].id,
+        content: result.rows[0].content,
+        order: result.rows[0].order_index,
+        characterId: result.rows[0].character_id,
+        imageId: result.rows[0].image_id
+      };
+
+      return res.status(200).json(text);
     }
 
     // テキスト削除
