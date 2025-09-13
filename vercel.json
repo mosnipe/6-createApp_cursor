@@ -3,7 +3,26 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install --production=false",
+  "functions": {
+    "api/migrate.ts": {
+      "runtime": "nodejs18.x"
+    },
+    "api/debug.ts": {
+      "runtime": "nodejs18.x"
+    },
+    "api/events.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "routes": [
+    {
+      "src": "/api/debug",
+      "dest": "/api/debug.ts"
+    },
+    {
+      "src": "/api/migrate",
+      "dest": "/api/migrate.ts"
+    },
     {
       "src": "/api/(.*)",
       "dest": "/api/events.ts"
