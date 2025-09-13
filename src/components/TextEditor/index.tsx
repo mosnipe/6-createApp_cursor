@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch, createText, updateText, deleteText, reorderTexts } from '../store';
-import { Event, TextItem } from '../types';
+import { RootState, AppDispatch, createText, updateText, deleteText, reorderTexts } from '../../store';
+import { Event, TextItem } from '../../types';
 import TextList from './TextList';
 import TextInput from './TextInput';
 

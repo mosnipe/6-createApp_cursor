@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction, configureStore } from '@reduxjs/toolkit';
 import { Event, TextItem, Character } from '../types';
 import { eventService, textService } from '../services/api';
 
@@ -228,8 +228,15 @@ export const {
 } = currentEventSlice.actions;
 export const { toggleSidebar, setPreviewMode, setDragIndex } = uiSlice.actions;
 
-export default {
-  events: eventsSlice.reducer,
-  currentEvent: currentEventSlice.reducer,
-  ui: uiSlice.reducer,
-};
+// ストア設定
+const store = configureStore({
+  reducer: {
+    events: eventsSlice.reducer,
+    currentEvent: currentEventSlice.reducer,
+    ui: uiSlice.reducer,
+  },
+});
+
+export type AppDispatch = typeof store.dispatch;
+
+export default store;

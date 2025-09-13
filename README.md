@@ -28,11 +28,11 @@ npm install
 ```bash
 # backend/.env
 DATABASE_URL=your_postgres_connection_string
-FRONTEND_URL=https://6-create-app-cursor-frontend-47rk.vercel.app
+FRONTEND_URL=https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app
 PORT=3001
 
 # .env.local
-VITE_API_URL=https://6-create-app-cursor-frontend-47rk.vercel.app/api
+VITE_API_URL=https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app/api
 ```
 
 ### 3. データベースセットアップ

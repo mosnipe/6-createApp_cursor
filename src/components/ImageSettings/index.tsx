@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch, updateEvent } from '../store';
-import { Event } from '../types';
+import { RootState, AppDispatch, updateEvent } from '../../store';
+import { Event } from '../../types';
 import { imageService } from '../../services/api';
 
 interface ImageSettingsProps {
