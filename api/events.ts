@@ -1,9 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Pool } from 'pg';
 
 // データベース接続の簡易実装
 const createDatabaseConnection = () => {
-  const { Pool } = require('pg');
-  
   // 環境変数の確認
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');

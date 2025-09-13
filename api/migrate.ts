@@ -1,6 +1,20 @@
-import { db } from '../backend/src/utils/database';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Pool } from 'pg';
 
-export default async function handler(req: any, res: any) {
+// データベース接続の簡易実装
+const createDatabaseConnection = () => {
+  // 環境変数の確認
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+  
+  return new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
+};
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS設定
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -14,11 +28,18 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  let pool: any = null;
+
   try {
     console.log('Starting database migration...');
+    
+    pool = createDatabaseConnection();
+    
+    // 接続テスト
+    await pool.query('SELECT 1');
 
     // イベントテーブル
-    await db.query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS events (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         title VARCHAR(255) NOT NULL,
@@ -30,7 +51,7 @@ export default async function handler(req: any, res: any) {
     `);
 
     // テキストテーブル
-    await db.query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS texts (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
@@ -42,7 +63,7 @@ export default async function handler(req: any, res: any) {
     `);
 
     // キャラクターテーブル
-    await db.query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS characters (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
@@ -54,7 +75,7 @@ export default async function handler(req: any, res: any) {
     `);
 
     // 画像テーブル
-    await db.query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS images (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         filename VARCHAR(255),
@@ -67,9 +88,11 @@ export default async function handler(req: any, res: any) {
     `);
 
     // インデックス作成
-    await db.query('CREATE INDEX IF NOT EXISTS idx_texts_event_id ON texts(event_id)');
-    await db.query('CREATE INDEX IF NOT EXISTS idx_texts_order ON texts(order_index)');
-    await db.query('CREATE INDEX IF NOT EXISTS idx_characters_event_id ON characters(event_id)');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_texts_event_id ON texts(event_id)');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_texts_order ON texts(order_index)');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_characters_event_id ON characters(event_id)');
+
+    await pool.end();
 
     console.log('Database migration completed successfully!');
 
@@ -80,6 +103,15 @@ export default async function handler(req: any, res: any) {
 
   } catch (error) {
     console.error('Migration error:', error);
+    
+    if (pool) {
+      try {
+        await pool.end();
+      } catch (closeError) {
+        console.error('Error closing database connection:', closeError);
+      }
+    }
+    
     res.status(500).json({ 
       error: 'Migration failed',
       details: error.message 
