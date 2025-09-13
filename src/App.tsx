@@ -1,16 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import reducers from './store';
+import store from './store';
 import HomePage from './pages/HomePage';
 import EventListPage from './pages/EventListPage';
 import EventEditPage from './pages/EventEditPage';
 import './index.css';
-
-const store = configureStore({
-  reducer: reducers,
-});
 
 function App() {
   return (
