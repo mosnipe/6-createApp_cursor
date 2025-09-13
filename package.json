@@ -19,7 +19,8 @@
   "vercel": {
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
-    "installCommand": "npm install --production=false"
+    "installCommand": "npm install --production=false",
+    "framework": "vite"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

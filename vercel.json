@@ -4,14 +4,22 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install --production=false",
+  "functions": {
+    "api/events.ts": {
+      "runtime": "nodejs18.x"
+    },
+    "api/migrate.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/src/index.ts"
+      "dest": "/api/events.ts"
     },
     {
       "src": "/(.*)",
-      "dest": "dist/$1"
+      "dest": "/index.html"
     }
   ]
 }
