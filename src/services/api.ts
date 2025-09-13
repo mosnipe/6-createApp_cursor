@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Event, TextItem, Character, CreateEventRequest, UpdateEventRequest, CreateTextRequest, UpdateTextRequest, ReorderTextsRequest } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD ? 'https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app/api' : 'http://localhost:3001/api');
+  (import.meta.env.PROD ? 'https://6-create-app-cursor-frontend-47rk.vercel.app/api' : 'http://localhost:3001/api');
 
 const api = axios.create({
   baseURL: API_BASE_URL,

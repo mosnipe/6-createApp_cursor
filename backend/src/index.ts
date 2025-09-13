@@ -15,7 +15,7 @@ const app = express();
 
 // ミドルウェア
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app',
+  origin: process.env.FRONTEND_URL || 'https://6-create-app-cursor-frontend-47rk.vercel.app',
   credentials: true,
 }));
 
