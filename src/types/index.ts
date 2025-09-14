@@ -85,8 +85,9 @@ export interface CreateEventRequest {
 export interface UpdateEventRequest {
   title?: string;
   description?: string;
-  backgroundImageId?: string;
+  background_image_id?: string;
   headerSettings?: HeaderSettings;
+  characters?: Character[];
 }
 
 export interface CreateTextRequest {

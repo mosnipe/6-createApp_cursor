@@ -76,7 +76,7 @@ const EventEditPage: React.FC = () => {
         eventData: {
           title: title.trim(),
           description: event.description,
-          backgroundImageId: event.backgroundImage,
+          background_image_id: event.backgroundImage,
           headerSettings: event.headerSettings,
           characters: event.characters
         }
