@@ -73,16 +73,27 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({ event }) => {
         </div>
       </div>
 
-      {/* キャラクター設定（将来実装） */}
-      <div className="powerproke-card">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          キャラクター設定
-        </h2>
-        <div className="text-center py-8 text-gray-500">
-          <p>キャラクター機能は</p>
-          <p>将来実装予定です</p>
+      {/* 背景画像プレビュー */}
+      {event.backgroundImage && (
+        <div className="powerproke-card">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            背景画像プレビュー
+          </h2>
+          <div className="border-2 border-gray-300 rounded-lg p-4 bg-gradient-to-b from-green-200 to-blue-300 h-48 relative overflow-hidden">
+            <img
+              src={event.backgroundImage}
+              alt="背景画像プレビュー"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+              <div className="text-white text-center">
+                <p className="text-lg font-semibold">背景画像プレビュー</p>
+                <p className="text-sm">実際のゲーム画面での表示イメージ</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* プレビュー */}
       <div className="powerproke-card">

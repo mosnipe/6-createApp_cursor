@@ -1,5 +1,5 @@
 import React from 'react';
-import { Event } from '../../types';
+import type { Event } from '../../types';
 
 interface PreviewPanelProps {
   event: Event;
@@ -18,11 +18,23 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ event }) => {
           {/* 上部ステータスバー */}
           <div className="bg-blue-300 px-4 py-2 text-sm font-game">
             <div className="flex justify-between items-center">
-              <span>1年目 6月3週 平日</span>
+              <span>
+                {event.headerSettings?.year || 1}年目 {event.headerSettings?.month || 6}月{event.headerSettings?.week || 3}週 {
+                  event.headerSettings?.dayType === 'weekday' ? '平日' : 
+                  event.headerSettings?.dayType === 'weekend' ? '週末' : '祝日'
+                }
+              </span>
               <div className="flex space-x-4">
-                <span>やる気: 😊</span>
-                <span>体力: ❤️❤️❤️❤️❤️</span>
-                <span>タフ: 💚💚</span>
+                {event.headerSettings?.stats && Object.entries(event.headerSettings.stats).map(([statName, stat]) => (
+                  <span key={statName}>
+                    {statName === 'motivation' ? 'やる気' : statName === 'stamina' ? '体力' : 'タフ'}: {stat.icon.repeat(stat.value)}
+                  </span>
+                ))}
+                {event.headerSettings?.customGauges?.map((gauge) => (
+                  <span key={gauge.id}>
+                    {gauge.name}: {gauge.icon}{gauge.value}/{gauge.max}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
@@ -38,11 +50,72 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ event }) => {
               />
             )}
             
-            {/* キャラクター表示エリア（将来実装） */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-gray-600 text-center">
-                <p className="text-lg font-game">キャラクター表示エリア</p>
-                <p className="text-sm">（将来実装予定）</p>
+            {/* キャラクター表示エリア */}
+            <div className="absolute inset-0 flex items-center justify-between px-8">
+              {/* 左側キャラクター */}
+              <div className="flex flex-col items-center">
+                {event.characters.filter(char => char.position === 'left').map(char => (
+                  <div key={char.id} className="mb-2">
+                    {char.imageUrl ? (
+                      <img
+                        src={char.imageUrl}
+                        alt={char.name}
+                        className="w-20 h-20 object-cover rounded border-2 border-white shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 bg-gray-300 rounded border-2 border-white flex items-center justify-center text-xs text-gray-600 shadow-lg">
+                        {char.name}
+                      </div>
+                    )}
+                    <p className="text-xs text-center mt-1 text-white font-semibold bg-black bg-opacity-50 px-2 py-1 rounded">
+                      {char.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* 中央キャラクター */}
+              <div className="flex flex-col items-center">
+                {event.characters.filter(char => char.position === 'center').map(char => (
+                  <div key={char.id} className="mb-2">
+                    {char.imageUrl ? (
+                      <img
+                        src={char.imageUrl}
+                        alt={char.name}
+                        className="w-24 h-24 object-cover rounded border-2 border-white shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 bg-gray-300 rounded border-2 border-white flex items-center justify-center text-xs text-gray-600 shadow-lg">
+                        {char.name}
+                      </div>
+                    )}
+                    <p className="text-xs text-center mt-1 text-white font-semibold bg-black bg-opacity-50 px-2 py-1 rounded">
+                      {char.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* 右側キャラクター */}
+              <div className="flex flex-col items-center">
+                {event.characters.filter(char => char.position === 'right').map(char => (
+                  <div key={char.id} className="mb-2">
+                    {char.imageUrl ? (
+                      <img
+                        src={char.imageUrl}
+                        alt={char.name}
+                        className="w-20 h-20 object-cover rounded border-2 border-white shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 bg-gray-300 rounded border-2 border-white flex items-center justify-center text-xs text-gray-600 shadow-lg">
+                        {char.name}
+                      </div>
+                    )}
+                    <p className="text-xs text-center mt-1 text-white font-semibold bg-black bg-opacity-50 px-2 py-1 rounded">
+                      {char.name}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -80,6 +153,8 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ event }) => {
             <h3 className="font-semibold text-gray-800 mb-2">統計</h3>
             <p className="text-sm text-gray-600">テキスト数: {event.texts.length}</p>
             <p className="text-sm text-gray-600">キャラクター数: {event.characters.length}</p>
+            <p className="text-sm text-gray-600">画像付きキャラクター: {event.characters.filter(char => char.imageUrl).length}</p>
+            <p className="text-sm text-gray-600">カスタムゲージ数: {event.headerSettings?.customGauges?.length || 0}</p>
           </div>
           
           <div className="powerproke-card">

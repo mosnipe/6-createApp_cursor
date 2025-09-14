@@ -8,6 +8,7 @@ export interface Event {
   texts: TextItem[];
   characters: Character[];
   backgroundImage: string | null;
+  headerSettings: HeaderSettings;
 }
 
 export interface TextItem {
@@ -23,6 +24,45 @@ export interface Character {
   name: string;
   imageUrl: string;
   position: 'left' | 'right' | 'center';
+}
+
+export interface HeaderSettings {
+  // ゲーム情報
+  year: number;
+  month: number;
+  week: number;
+  dayType: 'weekday' | 'weekend' | 'holiday';
+  
+  // ステータス
+  stats: {
+    motivation: {
+      value: number;
+      max: number;
+      icon: string;
+    };
+    stamina: {
+      value: number;
+      max: number;
+      icon: string;
+    };
+    toughness: {
+      value: number;
+      max: number;
+      icon: string;
+    };
+  };
+  
+  // カスタムゲージ
+  customGauges: CustomGauge[];
+}
+
+export interface CustomGauge {
+  id: string;
+  name: string;
+  value: number;
+  max: number;
+  color: string;
+  icon?: string;
 }
 
 export interface ImageSettings {
@@ -46,6 +86,7 @@ export interface UpdateEventRequest {
   title?: string;
   description?: string;
   backgroundImageId?: string;
+  headerSettings?: HeaderSettings;
 }
 
 export interface CreateTextRequest {
@@ -62,4 +103,16 @@ export interface UpdateTextRequest {
 
 export interface ReorderTextsRequest {
   textIds: string[];
+}
+
+export interface CreateCharacterRequest {
+  name: string;
+  imageUrl: string;
+  position: 'left' | 'right' | 'center';
+}
+
+export interface UpdateCharacterRequest {
+  name?: string;
+  imageUrl?: string;
+  position?: 'left' | 'right' | 'center';
 }

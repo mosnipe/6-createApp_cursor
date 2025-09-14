@@ -6,6 +6,49 @@ export interface Event {
   created_at: Date;
   updated_at: Date;
   background_image_id?: string;
+  backgroundImage?: string;
+  headerSettings?: HeaderSettings;
+  characters?: Character[];
+  texts?: Text[];
+}
+
+export interface HeaderSettings {
+  // ゲーム情報
+  year: number;
+  month: number;
+  week: number;
+  dayType: 'weekday' | 'weekend' | 'holiday';
+  
+  // ステータス
+  stats: {
+    motivation: {
+      value: number;
+      max: number;
+      icon: string;
+    };
+    stamina: {
+      value: number;
+      max: number;
+      icon: string;
+    };
+    toughness: {
+      value: number;
+      max: number;
+      icon: string;
+    };
+  };
+  
+  // カスタムゲージ
+  customGauges: CustomGauge[];
+}
+
+export interface CustomGauge {
+  id: string;
+  name: string;
+  value: number;
+  max: number;
+  color: string;
+  icon?: string;
 }
 
 export interface Text {
@@ -19,11 +62,11 @@ export interface Text {
 
 export interface Character {
   id: string;
-  event_id: string;
+  event_id?: string;
   name: string;
-  image_url: string;
+  imageUrl: string;
   position: 'left' | 'right' | 'center';
-  created_at: Date;
+  createdAt?: Date;
 }
 
 export interface Image {
@@ -47,6 +90,8 @@ export interface UpdateEventRequest {
   title?: string;
   description?: string;
   background_image_id?: string;
+  headerSettings?: HeaderSettings;
+  characters?: Character[];
 }
 
 export interface CreateTextRequest {

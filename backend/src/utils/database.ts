@@ -7,8 +7,11 @@ class Database {
   private pool: Pool;
   
   constructor() {
+    // 開発環境ではSQLiteを使用、本番環境ではPostgreSQLを使用
+    const databaseUrl = process.env.DATABASE_URL || 'postgresql://localhost:5432/powerproke_db';
+    
     this.pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: databaseUrl,
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
       max: 20,
       idleTimeoutMillis: 30000,

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction, configureStore } from '@reduxjs/toolkit';
-import { Event, TextItem, Character, UpdateEventRequest, CreateTextRequest, UpdateTextRequest } from '../types';
+import { Event, TextItem, Character, HeaderSettings, UpdateEventRequest, CreateTextRequest, UpdateTextRequest } from '../types';
 import { eventService, textService } from '../services/api';
 
 // イベント一覧の状態
@@ -57,6 +57,14 @@ export const createEvent = createAsyncThunk(
 
 export const updateEvent = createAsyncThunk(
   'currentEvent/updateEvent',
+  async ({ id, eventData }: { id: string; eventData: UpdateEventRequest }) => {
+    const event = await eventService.updateEvent(id, eventData);
+    return event;
+  }
+);
+
+export const saveStoryEvent = createAsyncThunk(
+  'currentEvent/saveStoryEvent',
   async ({ id, eventData }: { id: string; eventData: UpdateEventRequest }) => {
     const event = await eventService.updateEvent(id, eventData);
     return event;
@@ -164,6 +172,11 @@ const currentEventSlice = createSlice({
         state.event.backgroundImage = action.payload;
       }
     },
+    setHeaderSettings: (state, action: PayloadAction<HeaderSettings>) => {
+      if (state.event) {
+        state.event.headerSettings = action.payload;
+      }
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -184,6 +197,18 @@ const currentEventSlice = createSlice({
       })
       .addCase(updateEvent.fulfilled, (state, action) => {
         state.event = action.payload;
+      })
+      .addCase(saveStoryEvent.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(saveStoryEvent.fulfilled, (state, action) => {
+        state.loading = false;
+        state.event = action.payload;
+      })
+      .addCase(saveStoryEvent.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to save story event';
       })
       .addCase(createText.pending, (state) => {
         state.loading = true;
@@ -271,6 +296,7 @@ export const {
   updateTexts, 
   updateCharacters, 
   setBackgroundImage, 
+  setHeaderSettings,
   clearError: clearCurrentEventError 
 } = currentEventSlice.actions;
 export const { toggleSidebar, setPreviewMode, setDragIndex } = uiSlice.actions;

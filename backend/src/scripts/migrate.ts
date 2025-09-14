@@ -11,6 +11,7 @@ const createTables = async () => {
         title VARCHAR(255) NOT NULL,
         description TEXT,
         background_image_id UUID,
+        header_settings JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )

@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch, fetchEvent, updateEvent, setPreviewMode } from '../store';
 import TextEditor from '../components/TextEditor';
 import ImageSettings from '../components/ImageSettings';
+import CharacterSettings from '../components/CharacterSettings';
+import HeaderSettingsComponent from '../components/HeaderSettings';
 import PreviewPanel from '../components/PreviewPanel';
 
 const EventEditPage: React.FC = () => {
@@ -16,6 +18,9 @@ const EventEditPage: React.FC = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [activeTab, setActiveTab] = useState<'text' | 'images' | 'characters' | 'header'>('text');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -56,6 +61,56 @@ const EventEditPage: React.FC = () => {
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
     setHasUnsavedChanges(true);
+  };
+
+  const handleSaveStoryEvent = async () => {
+    if (!event) return;
+
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      // 全ての変更を保存
+      await dispatch(updateEvent({
+        id: event.id,
+        eventData: {
+          title: title.trim(),
+          description: event.description,
+          backgroundImageId: event.backgroundImage,
+          headerSettings: event.headerSettings,
+          characters: event.characters
+        }
+      }));
+
+      setHasUnsavedChanges(false);
+      setSaveMessage({
+        type: 'success',
+        message: 'ストーリーイベントが正常に保存されました！'
+      });
+
+      // 3秒後にメッセージを消す
+      setTimeout(() => {
+        setSaveMessage(null);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Failed to save story event:', error);
+      setSaveMessage({
+        type: 'error',
+        message: '保存に失敗しました。もう一度お試しください。'
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleFinishEditing = async () => {
+    await handleSaveStoryEvent();
+    
+    // 保存完了後、イベント一覧に戻る
+    setTimeout(() => {
+      navigate('/events');
+    }, 2000);
   };
 
   if (loading) {
@@ -134,6 +189,22 @@ const EventEditPage: React.FC = () => {
               >
                 {previewMode ? '編集モード' : 'プレビュー'}
               </button>
+              
+              <button
+                onClick={handleSaveStoryEvent}
+                disabled={isSaving || loading}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? '保存中...' : '保存'}
+              </button>
+              
+              <button
+                onClick={handleFinishEditing}
+                disabled={isSaving || loading}
+                className="px-6 py-2 bg-powerproke-blue text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+              >
+                {isSaving ? '完了中...' : '完了'}
+              </button>
             </div>
           </div>
         </div>
@@ -141,18 +212,121 @@ const EventEditPage: React.FC = () => {
 
       {/* メインコンテンツ */}
       <div className="container mx-auto px-4 py-6">
+        {/* 保存メッセージ */}
+        {saveMessage && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            saveMessage.type === 'success' 
+              ? 'bg-green-100 border border-green-400 text-green-700' 
+              : 'bg-red-100 border border-red-400 text-red-700'
+          }`}>
+            <div className="flex items-center">
+              <span className="mr-2">
+                {saveMessage.type === 'success' ? '✅' : '❌'}
+              </span>
+              <span className="font-medium">{saveMessage.message}</span>
+            </div>
+          </div>
+        )}
+
         {previewMode ? (
           <PreviewPanel event={event} />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* 左側: テキストエディター */}
-            <div className="lg:col-span-2">
-              <TextEditor event={event} />
+          <div className="space-y-6">
+            {/* タブナビゲーション */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="flex border-b">
+                <button
+                  onClick={() => setActiveTab('text')}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === 'text'
+                      ? 'text-powerproke-blue border-b-2 border-powerproke-blue bg-blue-50'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  📝 ストーリーテキスト
+                </button>
+                <button
+                  onClick={() => setActiveTab('images')}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === 'images'
+                      ? 'text-powerproke-blue border-b-2 border-powerproke-blue bg-blue-50'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  🖼️ 背景画像
+                </button>
+                <button
+                  onClick={() => setActiveTab('characters')}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === 'characters'
+                      ? 'text-powerproke-blue border-b-2 border-powerproke-blue bg-blue-50'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  👥 キャラクター設定
+                </button>
+                <button
+                  onClick={() => setActiveTab('header')}
+                  className={`px-6 py-3 text-sm font-medium ${
+                    activeTab === 'header'
+                      ? 'text-powerproke-blue border-b-2 border-powerproke-blue bg-blue-50'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  📊 ヘッダー設定
+                </button>
+              </div>
             </div>
-            
-            {/* 右側: 画像設定 */}
-            <div className="lg:col-span-1">
-              <ImageSettings event={event} />
+
+            {/* タブコンテンツ */}
+            <div className="min-h-[600px]">
+              {activeTab === 'text' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <TextEditor event={event} />
+                  </div>
+                  <div className="lg:col-span-1">
+                    <div className="powerproke-card">
+                      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                        テキスト統計
+                      </h2>
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-600">総テキスト数: {event.texts.length}</p>
+                        <p className="text-sm text-gray-600">総文字数: {event.texts.reduce((sum, text) => sum + text.content.length, 0)}</p>
+                        <p className="text-sm text-gray-600">平均文字数: {event.texts.length > 0 ? Math.round(event.texts.reduce((sum, text) => sum + text.content.length, 0) / event.texts.length) : 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'images' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <ImageSettings event={event} />
+                  </div>
+                  <div>
+                    <div className="powerproke-card">
+                      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                        画像統計
+                      </h2>
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-600">背景画像: {event.backgroundImage ? '設定済み' : '未設定'}</p>
+                        <p className="text-sm text-gray-600">キャラクター数: {event.characters.length}</p>
+                        <p className="text-sm text-gray-600">画像付きキャラクター: {event.characters.filter(char => char.imageUrl).length}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'characters' && (
+                <CharacterSettings event={event} />
+              )}
+
+              {activeTab === 'header' && (
+                <HeaderSettingsComponent event={event} />
+              )}
             </div>
           </div>
         )}
