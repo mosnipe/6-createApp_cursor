@@ -5,7 +5,7 @@
 
 ## ベースURL
 - 開発環境: `http://localhost:3001/api`
-- 本番環境: `https://your-domain.vercel.app/api`
+- 本番環境: `https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app/api`
 
 ## 認証
 現在は認証機能は実装されていません。
@@ -23,6 +23,7 @@
 ### エラーコード
 - `VALIDATION_ERROR`: バリデーションエラー
 - `NOT_FOUND`: リソースが見つからない
+- `UNAUTHORIZED`: 認証エラー
 - `FILE_UPLOAD_ERROR`: ファイルアップロードエラー
 - `DATABASE_ERROR`: データベースエラー
 - `INTERNAL_ERROR`: 内部サーバーエラー
@@ -108,7 +109,36 @@
   "created_at": "2024-01-01T00:00:00.000Z",
   "updated_at": "2024-01-01T00:00:00.000Z",
   "background_image_id": "uuid",
-  "background_image_path": "/uploads/images/filename.jpg"
+  "backgroundImage": "/uploads/images/filename.jpg",
+  "headerSettings": {
+    "year": 2024,
+    "month": 1,
+    "week": 1,
+    "dayType": "weekday",
+    "stats": {
+      "motivation": { "value": 80, "max": 100, "icon": "🔥" },
+      "stamina": { "value": 70, "max": 100, "icon": "💪" },
+      "toughness": { "value": 60, "max": 100, "icon": "🛡️" }
+    },
+    "customGauges": []
+  },
+  "characters": [
+    {
+      "id": "uuid",
+      "name": "キャラクター名",
+      "imageUrl": "/uploads/images/character.jpg",
+      "position": "left"
+    }
+  ],
+  "texts": [
+    {
+      "id": "uuid",
+      "content": "テキスト内容",
+      "order_index": 0,
+      "character_id": "uuid",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -123,7 +153,27 @@
 {
   "title": "更新されたタイトル（任意）",
   "description": "更新された説明（任意）",
-  "background_image_id": "uuid（任意）"
+  "background_image_id": "uuid（任意）",
+  "headerSettings": {
+    "year": 2024,
+    "month": 1,
+    "week": 1,
+    "dayType": "weekday",
+    "stats": {
+      "motivation": { "value": 80, "max": 100, "icon": "🔥" },
+      "stamina": { "value": 70, "max": 100, "icon": "💪" },
+      "toughness": { "value": 60, "max": 100, "icon": "🛡️" }
+    },
+    "customGauges": []
+  },
+  "characters": [
+    {
+      "id": "uuid",
+      "name": "キャラクター名",
+      "imageUrl": "/uploads/images/character.jpg",
+      "position": "left"
+    }
+  ]
 }
 ```
 
@@ -259,6 +309,98 @@
 
 ---
 
+### キャラクター管理
+
+#### GET /events/:eventId/characters
+指定されたイベントのキャラクター一覧を取得します。
+
+**パラメータ:**
+- `eventId`: イベントのUUID
+
+**レスポンス:**
+```json
+[
+  {
+    "id": "uuid",
+    "event_id": "uuid",
+    "name": "キャラクター名",
+    "imageUrl": "/uploads/images/character.jpg",
+    "position": "left",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+]
+```
+
+#### POST /events/:eventId/characters
+指定されたイベントに新しいキャラクターを追加します。
+
+**パラメータ:**
+- `eventId`: イベントのUUID
+
+**リクエストボディ:**
+```json
+{
+  "name": "キャラクター名",
+  "imageUrl": "/uploads/images/character.jpg",
+  "position": "left"
+}
+```
+
+**バリデーション:**
+- `name`: 必須、1-100文字
+- `imageUrl`: 必須、有効なURL
+- `position`: 必須、'left' | 'right' | 'center'
+
+**レスポンス:**
+```json
+{
+  "id": "uuid",
+  "event_id": "uuid",
+  "name": "キャラクター名",
+  "imageUrl": "/uploads/images/character.jpg",
+  "position": "left",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### PUT /characters/:id
+指定されたIDのキャラクターを更新します。
+
+**パラメータ:**
+- `id`: キャラクターのUUID
+
+**リクエストボディ:**
+```json
+{
+  "name": "更新されたキャラクター名（任意）",
+  "imageUrl": "/uploads/images/new-character.jpg（任意）",
+  "position": "right（任意）"
+}
+```
+
+**レスポンス:**
+```json
+{
+  "id": "uuid",
+  "event_id": "uuid",
+  "name": "更新されたキャラクター名",
+  "imageUrl": "/uploads/images/new-character.jpg",
+  "position": "right",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### DELETE /characters/:id
+指定されたIDのキャラクターを削除します。
+
+**パラメータ:**
+- `id`: キャラクターのUUID
+
+**レスポンス:**
+- ステータスコード: 204 (No Content)
+
+---
+
 ### 画像管理
 
 #### POST /images/upload
@@ -274,7 +416,12 @@
 ```json
 {
   "id": "uuid",
-  "url": "/api/images/uuid"
+  "filename": "original-filename.jpg",
+  "original_url": "/uploads/images/uuid.jpg",
+  "file_path": "/path/to/uploads/images/uuid.jpg",
+  "file_size": 1024000,
+  "mime_type": "image/jpeg",
+  "created_at": "2024-01-01T00:00:00.000Z"
 }
 ```
 
@@ -328,6 +475,33 @@ curl -X POST http://localhost:3001/api/images/upload \
 curl -X PUT http://localhost:3001/api/events/{eventId} \
   -H "Content-Type: application/json" \
   -d '{"background_image_id": "{imageId}"}'
+```
+
+5. **キャラクター追加**
+```bash
+curl -X POST http://localhost:3001/api/events/{eventId}/characters \
+  -H "Content-Type: application/json" \
+  -d '{"name": "主人公", "imageUrl": "/uploads/images/character.jpg", "position": "left"}'
+```
+
+6. **ヘッダー設定更新**
+```bash
+curl -X PUT http://localhost:3001/api/events/{eventId} \
+  -H "Content-Type: application/json" \
+  -d '{
+    "headerSettings": {
+      "year": 2024,
+      "month": 1,
+      "week": 1,
+      "dayType": "weekday",
+      "stats": {
+        "motivation": {"value": 80, "max": 100, "icon": "🔥"},
+        "stamina": {"value": 70, "max": 100, "icon": "💪"},
+        "toughness": {"value": 60, "max": 100, "icon": "🛡️"}
+      },
+      "customGauges": []
+    }
+  }'
 ```
 
 ## レート制限

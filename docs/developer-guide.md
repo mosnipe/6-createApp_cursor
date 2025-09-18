@@ -9,7 +9,7 @@
 - **React 19.1.1**: UI フレームワーク
 - **TypeScript 5.8.3**: 型安全性
 - **Vite 7.1.2**: ビルドツール
-- **Tailwind CSS 4.1.13**: スタイリング
+- **Tailwind CSS 3.4.0**: スタイリング
 - **Redux Toolkit 2.9.0**: 状態管理
 - **React Router DOM 7.8.2**: ルーティング
 - **@dnd-kit**: ドラッグ&ドロップ機能
@@ -39,26 +39,23 @@
 
 ```
 project/
-├── frontend/                 # React フロントエンド
-│   ├── src/
-│   │   ├── components/      # React コンポーネント
-│   │   │   ├── TextEditor/  # テキストエディター
-│   │   │   ├── ImageSettings/ # 画像設定
-│   │   │   └── PreviewPanel/  # プレビューパネル
-│   │   ├── pages/           # ページコンポーネント
-│   │   ├── store/           # Redux ストア
-│   │   ├── services/        # API サービス
-│   │   ├── types/           # TypeScript 型定義
-│   │   ├── hooks/           # カスタムフック
-│   │   └── test/            # テストファイル
-│   ├── public/              # 静的ファイル
-│   └── package.json
+├── src/                     # React フロントエンド
+│   ├── components/          # React コンポーネント
+│   │   ├── TextEditor/      # テキストエディター
+│   │   ├── ImageSettings/   # 画像設定
+│   │   ├── CharacterSettings/ # キャラクター設定
+│   │   ├── HeaderSettings/  # ヘッダー設定
+│   │   └── PreviewPanel/    # プレビューパネル
+│   ├── pages/               # ページコンポーネント
+│   ├── store/               # Redux ストア
+│   ├── services/            # API サービス
+│   ├── types/               # TypeScript 型定義
+│   ├── hooks/               # カスタムフック
+│   └── test/                # テストファイル
 ├── backend/                 # Express バックエンド
 │   ├── src/
 │   │   ├── controllers/     # コントローラー
 │   │   ├── services/        # ビジネスロジック
-│   │   ├── models/          # データモデル
-│   │   ├── routes/          # ルート定義
 │   │   ├── middleware/      # ミドルウェア
 │   │   ├── utils/           # ユーティリティ
 │   │   ├── types/           # TypeScript 型定義
@@ -67,6 +64,7 @@ project/
 │   ├── uploads/             # アップロードファイル
 │   └── package.json
 ├── docs/                    # ドキュメント
+├── local-api/               # ローカル開発用API
 └── package.json             # ルート設定
 ```
 
@@ -90,12 +88,8 @@ cd powerproke-text-novel-editor
 # ルートディレクトリ
 npm install
 
-# フロントエンド
-cd frontend
-npm install
-
 # バックエンド
-cd ../backend
+cd backend
 npm install
 ```
 
@@ -122,20 +116,12 @@ npm run db:migrate create
 
 ### 5. 開発サーバーの起動
 ```bash
-# ルートディレクトリから
-npm run dev
-```
+# ルートディレクトリから（推奨）
+npm run dev:local
 
-または個別に起動：
-
-```bash
-# フロントエンド
-cd frontend
-npm run dev
-
-# バックエンド
-cd backend
-npm run dev
+# または個別に起動
+npm run dev          # フロントエンドのみ
+npm run dev:backend   # バックエンドのみ
 ```
 
 ---
@@ -200,7 +186,6 @@ Closes #123
 
 ### フロントエンドテスト
 ```bash
-cd frontend
 npm test                    # テスト実行
 npm run test:ui            # UI付きテスト
 npm run test:coverage      # カバレッジ付きテスト
