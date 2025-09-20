@@ -13,6 +13,10 @@
       "dest": "/api/migrate.ts"
     },
     {
+      "src": "/api/fix-texts-table",
+      "dest": "/api/fix-texts-table.ts"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/events.ts"
     },
