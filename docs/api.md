@@ -311,95 +311,24 @@
 
 ### キャラクター管理
 
-#### GET /events/:eventId/characters
-指定されたイベントのキャラクター一覧を取得します。
+**注意**: キャラクター管理は現在、イベント更新API (`PUT /api/events/:id`) を通じて行われます。キャラクター専用のAPIエンドポイントは実装されていません。
 
-**パラメータ:**
-- `eventId`: イベントのUUID
-
-**レスポンス:**
-```json
-[
-  {
-    "id": "uuid",
-    "event_id": "uuid",
-    "name": "キャラクター名",
-    "imageUrl": "/uploads/images/character.jpg",
-    "position": "left",
-    "createdAt": "2024-01-01T00:00:00.000Z"
-  }
-]
-```
-
-#### POST /events/:eventId/characters
-指定されたイベントに新しいキャラクターを追加します。
-
-**パラメータ:**
-- `eventId`: イベントのUUID
+#### キャラクターの追加・更新・削除
+キャラクターの管理は、イベント更新APIを使用して `characters` 配列を更新することで行います。
 
 **リクエストボディ:**
 ```json
 {
-  "name": "キャラクター名",
-  "imageUrl": "/uploads/images/character.jpg",
-  "position": "left"
+  "characters": [
+    {
+      "id": "uuid",
+      "name": "キャラクター名",
+      "imageUrl": "/uploads/images/character.jpg",
+      "position": "left"
+    }
+  ]
 }
 ```
-
-**バリデーション:**
-- `name`: 必須、1-100文字
-- `imageUrl`: 必須、有効なURL
-- `position`: 必須、'left' | 'right' | 'center'
-
-**レスポンス:**
-```json
-{
-  "id": "uuid",
-  "event_id": "uuid",
-  "name": "キャラクター名",
-  "imageUrl": "/uploads/images/character.jpg",
-  "position": "left",
-  "createdAt": "2024-01-01T00:00:00.000Z"
-}
-```
-
-#### PUT /characters/:id
-指定されたIDのキャラクターを更新します。
-
-**パラメータ:**
-- `id`: キャラクターのUUID
-
-**リクエストボディ:**
-```json
-{
-  "name": "更新されたキャラクター名（任意）",
-  "imageUrl": "/uploads/images/new-character.jpg（任意）",
-  "position": "right（任意）"
-}
-```
-
-**レスポンス:**
-```json
-{
-  "id": "uuid",
-  "event_id": "uuid",
-  "name": "更新されたキャラクター名",
-  "imageUrl": "/uploads/images/new-character.jpg",
-  "position": "right",
-  "createdAt": "2024-01-01T00:00:00.000Z"
-}
-```
-
-#### DELETE /characters/:id
-指定されたIDのキャラクターを削除します。
-
-**パラメータ:**
-- `id`: キャラクターのUUID
-
-**レスポンス:**
-- ステータスコード: 204 (No Content)
-
----
 
 ### 画像管理
 
@@ -479,9 +408,18 @@ curl -X PUT http://localhost:3001/api/events/{eventId} \
 
 5. **キャラクター追加**
 ```bash
-curl -X POST http://localhost:3001/api/events/{eventId}/characters \
+curl -X PUT http://localhost:3001/api/events/{eventId} \
   -H "Content-Type: application/json" \
-  -d '{"name": "主人公", "imageUrl": "/uploads/images/character.jpg", "position": "left"}'
+  -d '{
+    "characters": [
+      {
+        "id": "char_123",
+        "name": "主人公",
+        "imageUrl": "/uploads/images/character.jpg",
+        "position": "left"
+      }
+    ]
+  }'
 ```
 
 6. **ヘッダー設定更新**

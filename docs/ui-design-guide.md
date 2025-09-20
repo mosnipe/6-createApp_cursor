@@ -446,6 +446,53 @@
 - **Semantic HTML**: 意味のあるHTML構造
 - **Alt Text**: 画像の代替テキスト
 
+## 状態管理
+
+### Redux Store構成
+
+```mermaid
+graph TB
+    A[Redux Store] --> B[Events Slice]
+    A --> C[Current Event Slice]
+    A --> D[UI Slice]
+    
+    B --> B1[list: Event[]]
+    B --> B2[loading: boolean]
+    B --> B3[error: string]
+    
+    C --> C1[event: Event]
+    C --> C2[loading: boolean]
+    C --> C3[error: string]
+    
+    D --> D1[sidebarOpen: boolean]
+    D --> D2[previewMode: boolean]
+    D --> D3[dragIndex: number | null]
+    
+    subgraph "Local State (useState)"
+        E[activeTab: string]
+        F[isEditingTitle: boolean]
+        G[hasUnsavedChanges: boolean]
+    end
+```
+
+### データフロー
+
+```mermaid
+graph LR
+    A[User Action] --> B[Component]
+    B --> C[Redux Action]
+    C --> D[Redux Reducer]
+    D --> E[Store Update]
+    E --> F[Component Re-render]
+    F --> G[UI Update]
+    
+    H[API Call] --> I[Service Layer]
+    I --> J[Backend API]
+    J --> K[Response]
+    K --> L[Redux Action]
+    L --> D
+```
+
 ## 今後の拡張予定
 
 ### 追加予定のUI要素
