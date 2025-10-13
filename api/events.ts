@@ -116,7 +116,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         updatedAt: row.updated_at,
         backgroundImage: row.background_image_id,
         texts: row.texts || [],
-        characters: row.characters || []
+        characters: row.characters || [],
+        headerSettings: {
+          year: 1,
+          month: 6,
+          week: 3,
+          dayType: 'weekday',
+          stats: {
+            motivation: { value: 3, max: 5, icon: '😊' },
+            stamina: { value: 5, max: 5, icon: '❤️' },
+            toughness: { value: 2, max: 5, icon: '💚' }
+          }
+        }
       }));
       
       await pool.end();
@@ -146,7 +157,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         updatedAt: result.rows[0].updated_at,
         backgroundImage: result.rows[0].background_image_id,
         texts: [],
-        characters: []
+        characters: [],
+        headerSettings: {
+          year: 1,
+          month: 6,
+          week: 3,
+          dayType: 'weekday',
+          stats: {
+            motivation: { value: 3, max: 5, icon: '😊' },
+            stamina: { value: 5, max: 5, icon: '❤️' },
+            toughness: { value: 2, max: 5, icon: '💚' }
+          }
+        }
       };
 
       await pool.end();
@@ -204,7 +226,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         updatedAt: result.rows[0].updated_at,
         backgroundImage: result.rows[0].background_image_id,
         texts: result.rows[0].texts || [],
-        characters: result.rows[0].characters || []
+        characters: result.rows[0].characters || [],
+        headerSettings: {
+          year: 1,
+          month: 6,
+          week: 3,
+          dayType: 'weekday',
+          stats: {
+            motivation: { value: 3, max: 5, icon: '😊' },
+            stamina: { value: 5, max: 5, icon: '❤️' },
+            toughness: { value: 2, max: 5, icon: '💚' }
+          }
+        }
       };
 
       return res.status(200).json(event);
@@ -213,29 +246,110 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // イベント更新
     if (method === 'PUT' && path.startsWith('/events/')) {
       const eventId = path.split('/')[2];
-      const { title, description } = req.body;
+      const { title, description, characters, backgroundImageId, headerSettings } = req.body;
 
-      const result = await pool.query(
-        'UPDATE events SET title = $1, description = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *',
-        [title, description, eventId]
+      // イベント基本情報の更新
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+
+      if (title !== undefined) {
+        updateFields.push(`title = $${paramIndex}`);
+        updateValues.push(title);
+        paramIndex++;
+      }
+
+      if (description !== undefined) {
+        updateFields.push(`description = $${paramIndex}`);
+        updateValues.push(description);
+        paramIndex++;
+      }
+
+      if (backgroundImageId !== undefined) {
+        updateFields.push(`background_image_id = $${paramIndex}`);
+        updateValues.push(backgroundImageId);
+        paramIndex++;
+      }
+
+      if (updateFields.length > 0) {
+        updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
+        updateValues.push(eventId);
+
+        const updateQuery = `UPDATE events SET ${updateFields.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+        await pool.query(updateQuery, updateValues);
+      }
+
+      // キャラクターの更新
+      if (characters !== undefined) {
+        // 既存のキャラクターを削除
+        await pool.query('DELETE FROM characters WHERE event_id = $1', [eventId]);
+        
+        // 新しいキャラクターを追加
+        for (const character of characters) {
+          await pool.query(
+            'INSERT INTO characters (id, event_id, name, image_url, position) VALUES ($1, $2, $3, $4, $5)',
+            [character.id, eventId, character.name, character.imageUrl, character.position]
+          );
+        }
+      }
+
+      // イベント情報を再取得（関連データを含む）
+      const eventResult = await pool.query(
+        'SELECT * FROM events WHERE id = $1',
+        [eventId]
+      );
+
+      if (eventResult.rows.length === 0) {
+        await pool.end();
+        return res.status(404).json({ error: 'Event not found' });
+      }
+
+      // テキストを取得
+      const textsResult = await pool.query(
+        'SELECT * FROM texts WHERE event_id = $1 ORDER BY order_index',
+        [eventId]
+      );
+
+      // キャラクターを取得
+      const charactersResult = await pool.query(
+        'SELECT * FROM characters WHERE event_id = $1',
+        [eventId]
       );
 
       await pool.end();
 
-      if (result.rows.length === 0) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
-
       // レスポンス形式をフロントエンドに合わせる
       const event = {
-        id: result.rows[0].id,
-        title: result.rows[0].title,
-        description: result.rows[0].description,
-        createdAt: result.rows[0].created_at,
-        updatedAt: result.rows[0].updated_at,
-        backgroundImage: result.rows[0].background_image_id,
-        texts: [],
-        characters: []
+        id: eventResult.rows[0].id,
+        title: eventResult.rows[0].title,
+        description: eventResult.rows[0].description,
+        createdAt: eventResult.rows[0].created_at,
+        updatedAt: eventResult.rows[0].updated_at,
+        backgroundImage: eventResult.rows[0].background_image_id,
+        texts: textsResult.rows.map(text => ({
+          id: text.id,
+          content: text.content,
+          order: text.order_index,
+          characterId: text.character_id,
+          imageId: text.image_id
+        })),
+        characters: charactersResult.rows.map(char => ({
+          id: char.id,
+          name: char.name,
+          imageUrl: char.image_url,
+          position: char.position
+        })),
+        headerSettings: headerSettings || {
+          year: 1,
+          month: 6,
+          week: 3,
+          dayType: 'weekday',
+          stats: {
+            motivation: { value: 3, max: 5, icon: '😊' },
+            stamina: { value: 5, max: 5, icon: '❤️' },
+            toughness: { value: 2, max: 5, icon: '💚' }
+          }
+        }
       };
 
       return res.status(200).json(event);

@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch, fetchEvent, updateEvent, setPreviewMode } from '../store';
 import TextEditor from '../components/TextEditor';
-import ImageSettings from '../components/ImageSettings';
 import CharacterSettings from '../components/CharacterSettings';
 import HeaderSettingsComponent from '../components/HeaderSettings';
 import PreviewPanel from '../components/PreviewPanel';
@@ -18,7 +17,7 @@ const EventEditPage: React.FC = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [activeTab, setActiveTab] = useState<'text' | 'images' | 'characters' | 'header'>('text');
+  const [activeTab, setActiveTab] = useState<'text' | 'characters' | 'header'>('text');
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -246,16 +245,6 @@ const EventEditPage: React.FC = () => {
                   📝 ストーリーテキスト
                 </button>
                 <button
-                  onClick={() => setActiveTab('images')}
-                  className={`px-6 py-3 text-sm font-medium ${
-                    activeTab === 'images'
-                      ? 'text-powerproke-blue border-b-2 border-powerproke-blue bg-blue-50'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  🖼️ 背景画像
-                </button>
-                <button
                   onClick={() => setActiveTab('characters')}
                   className={`px-6 py-3 text-sm font-medium ${
                     activeTab === 'characters'
@@ -300,25 +289,6 @@ const EventEditPage: React.FC = () => {
                 </div>
               )}
 
-              {activeTab === 'images' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div>
-                    <ImageSettings event={event} />
-                  </div>
-                  <div>
-                    <div className="powerproke-card">
-                      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                        画像統計
-                      </h2>
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-600">背景画像: {event.backgroundImage ? '設定済み' : '未設定'}</p>
-                        <p className="text-sm text-gray-600">キャラクター数: {event.characters.length}</p>
-                        <p className="text-sm text-gray-600">画像付きキャラクター: {event.characters.filter(char => char.imageUrl).length}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {activeTab === 'characters' && (
                 <CharacterSettings event={event} />
