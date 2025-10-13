@@ -17,26 +17,29 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { TextItem } from '../../types';
+import { TextItem, Character } from '../../types';
 
 interface TextListProps {
   texts: TextItem[];
-  onUpdate: (id: string, content: string) => void;
+  onUpdate: (id: string, content: string, characterId?: string) => void;
   onDelete: (id: string) => void;
   onReorder: (textIds: string[]) => void;
   disabled?: boolean;
+  characters: Character[];
 }
 
 interface TextItemProps {
   text: TextItem;
-  onUpdate: (id: string, content: string) => void;
+  onUpdate: (id: string, content: string, characterId?: string) => void;
   onDelete: (id: string) => void;
   disabled?: boolean;
+  characters: Character[];
 }
 
-const SortableTextItem: React.FC<TextItemProps> = ({ text, onUpdate, onDelete, disabled = false }) => {
+const SortableTextItem: React.FC<TextItemProps> = ({ text, onUpdate, onDelete, disabled = false, characters }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(text.content);
+  const [selectedCharacterId, setSelectedCharacterId] = useState(text.characterId || '');
 
   const {
     attributes,
@@ -54,16 +57,18 @@ const SortableTextItem: React.FC<TextItemProps> = ({ text, onUpdate, onDelete, d
   };
 
   const handleSave = () => {
-    if (content.trim() && content !== text.content) {
-      onUpdate(text.id, content);
+    if (content.trim() && (content !== text.content || selectedCharacterId !== (text.characterId || ''))) {
+      onUpdate(text.id, content, selectedCharacterId || undefined);
     } else {
       setContent(text.content);
+      setSelectedCharacterId(text.characterId || '');
     }
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setContent(text.content);
+    setSelectedCharacterId(text.characterId || '');
     setIsEditing(false);
   };
 
@@ -102,9 +107,21 @@ const SortableTextItem: React.FC<TextItemProps> = ({ text, onUpdate, onDelete, d
         {/* テキスト内容 */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-500">
-              #{text.order + 1}
-            </span>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-gray-500">
+                #{text.order + 1}
+              </span>
+              {text.characterId && (
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  {characters.find(c => c.id === text.characterId)?.name || '不明なキャラクター'}
+                </span>
+              )}
+              {!text.characterId && (
+                <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                  システム
+                </span>
+              )}
+            </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => setIsEditing(true)}
@@ -124,15 +141,30 @@ const SortableTextItem: React.FC<TextItemProps> = ({ text, onUpdate, onDelete, d
           </div>
 
           {isEditing ? (
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={handleSave}
-              className="powerproke-input w-full h-20 resize-none"
-              autoFocus
-              disabled={disabled}
-            />
+            <div className="space-y-2">
+              <select
+                value={selectedCharacterId}
+                onChange={(e) => setSelectedCharacterId(e.target.value)}
+                disabled={disabled}
+                className="powerproke-input w-full"
+              >
+                <option value="">システム（ナレーション）</option>
+                {characters.map((character) => (
+                  <option key={character.id} value={character.id}>
+                    {character.name}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onBlur={handleSave}
+                className="powerproke-input w-full h-20 resize-none"
+                autoFocus
+                disabled={disabled}
+              />
+            </div>
           ) : (
             <p className="text-gray-800 whitespace-pre-wrap">{text.content}</p>
           )}
@@ -148,6 +180,7 @@ const TextList: React.FC<TextListProps> = ({
   onDelete,
   onReorder,
   disabled = false,
+  characters,
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -196,6 +229,7 @@ const TextList: React.FC<TextListProps> = ({
               onUpdate={onUpdate}
               onDelete={onDelete}
               disabled={disabled}
+              characters={characters}
             />
           ))}
         </div>

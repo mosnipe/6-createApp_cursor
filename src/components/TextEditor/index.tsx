@@ -13,7 +13,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ event }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { loading } = useSelector((state: RootState) => state.currentEvent);
 
-  const handleCreateText = async (content: string) => {
+  const handleCreateText = async (content: string, characterId?: string) => {
     if (!content.trim()) return;
 
     try {
@@ -22,6 +22,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ event }) => {
         textData: {
           content: content.trim(),
           order: event.texts.length,
+          characterId,
         }
       }));
     } catch (error) {
@@ -29,11 +30,14 @@ const TextEditor: React.FC<TextEditorProps> = ({ event }) => {
     }
   };
 
-  const handleUpdateText = async (id: string, content: string) => {
+  const handleUpdateText = async (id: string, content: string, characterId?: string) => {
     try {
       await dispatch(updateText({
         id,
-        textData: { content: content.trim() }
+        textData: { 
+          content: content.trim(),
+          characterId
+        }
       }));
     } catch (error) {
       console.error('Failed to update text:', error);
@@ -66,6 +70,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ event }) => {
         <TextInput
           onSubmit={handleCreateText}
           disabled={loading}
+          characters={event.characters}
         />
       </div>
 
@@ -80,6 +85,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ event }) => {
           onDelete={handleDeleteText}
           onReorder={handleReorderTexts}
           disabled={loading}
+          characters={event.characters}
         />
       </div>
     </div>

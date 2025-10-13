@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch, updateEvent } from '../../store';
-import { Event, HeaderSettings, CustomGauge } from '../../types';
+import { Event, HeaderSettings } from '../../types';
 
 interface HeaderSettingsProps {
   event: Event;
@@ -21,7 +21,6 @@ const HeaderSettingsComponent: React.FC<HeaderSettingsProps> = ({ event }) => {
         stamina: { value: 5, max: 5, icon: '❤️' },
         toughness: { value: 2, max: 5, icon: '💚' }
       },
-      customGauges: []
     }
   );
 
@@ -55,40 +54,6 @@ const HeaderSettingsComponent: React.FC<HeaderSettingsProps> = ({ event }) => {
     handleSettingsChange(newSettings);
   };
 
-  const addCustomGauge = () => {
-    const newGauge: CustomGauge = {
-      id: `gauge_${Date.now()}`,
-      name: '新しいゲージ',
-      value: 0,
-      max: 100,
-      color: '#3B82F6',
-      icon: '📊'
-    };
-    
-    const newSettings = {
-      ...settings,
-      customGauges: [...settings.customGauges, newGauge]
-    };
-    handleSettingsChange(newSettings);
-  };
-
-  const updateCustomGauge = (gaugeId: string, field: keyof CustomGauge, value: string | number) => {
-    const newSettings = {
-      ...settings,
-      customGauges: settings.customGauges.map(gauge =>
-        gauge.id === gaugeId ? { ...gauge, [field]: value } : gauge
-      )
-    };
-    handleSettingsChange(newSettings);
-  };
-
-  const removeCustomGauge = (gaugeId: string) => {
-    const newSettings = {
-      ...settings,
-      customGauges: settings.customGauges.filter(gauge => gauge.id !== gaugeId)
-    };
-    handleSettingsChange(newSettings);
-  };
 
   const renderGaugeBar = (value: number, max: number, color: string) => {
     const percentage = Math.min((value / max) * 100, 100);
@@ -251,122 +216,6 @@ const HeaderSettingsComponent: React.FC<HeaderSettingsProps> = ({ event }) => {
         </div>
       </div>
 
-      {/* カスタムゲージ設定 */}
-      <div className="powerproke-card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
-            カスタムゲージ設定 ({settings.customGauges.length}個)
-          </h2>
-          <button
-            onClick={addCustomGauge}
-            disabled={loading}
-            className="powerproke-button"
-          >
-            ゲージ追加
-          </button>
-        </div>
-        
-        <div className="space-y-4">
-          {settings.customGauges.map((gauge) => (
-            <div key={gauge.id} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    ゲージ名
-                  </label>
-                  <input
-                    type="text"
-                    value={gauge.name}
-                    onChange={(e) => updateCustomGauge(gauge.id, 'name', e.target.value)}
-                    disabled={loading}
-                    className="powerproke-input w-full"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    アイコン
-                  </label>
-                  <input
-                    type="text"
-                    value={gauge.icon || ''}
-                    onChange={(e) => updateCustomGauge(gauge.id, 'icon', e.target.value)}
-                    disabled={loading}
-                    className="powerproke-input w-full"
-                    maxLength={2}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    現在値
-                  </label>
-                  <input
-                    type="number"
-                    value={gauge.value}
-                    onChange={(e) => updateCustomGauge(gauge.id, 'value', parseInt(e.target.value) || 0)}
-                    disabled={loading}
-                    className="powerproke-input w-full"
-                    min="0"
-                    max={gauge.max}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    最大値
-                  </label>
-                  <input
-                    type="number"
-                    value={gauge.max}
-                    onChange={(e) => updateCustomGauge(gauge.id, 'max', parseInt(e.target.value) || 1)}
-                    disabled={loading}
-                    className="powerproke-input w-full"
-                    min="1"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    色
-                  </label>
-                  <div className="flex space-x-2">
-                    <input
-                      type="color"
-                      value={gauge.color}
-                      onChange={(e) => updateCustomGauge(gauge.id, 'color', e.target.value)}
-                      disabled={loading}
-                      className="w-full h-10 border border-gray-300 rounded"
-                    />
-                    <button
-                      onClick={() => removeCustomGauge(gauge.id)}
-                      disabled={loading}
-                      className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
-                    >
-                      削除
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-3">
-                <div className="flex items-center space-x-2 mb-1">
-                  <span className="text-sm text-gray-600">{gauge.icon}</span>
-                  <span className="text-sm text-gray-600">{gauge.name}: {gauge.value}/{gauge.max}</span>
-                </div>
-                {renderGaugeBar(gauge.value, gauge.max, gauge.color)}
-              </div>
-            </div>
-          ))}
-          
-          {settings.customGauges.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>カスタムゲージが登録されていません</p>
-              <p className="text-sm">「ゲージ追加」ボタンで追加してください</p>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* ヘッダープレビュー */}
       <div className="powerproke-card">
@@ -388,11 +237,6 @@ const HeaderSettingsComponent: React.FC<HeaderSettingsProps> = ({ event }) => {
                 {Object.entries(settings.stats).map(([statName, stat]) => (
                   <span key={statName}>
                     {statName === 'motivation' ? 'やる気' : statName === 'stamina' ? '体力' : 'タフ'}: {stat.icon.repeat(stat.value)}
-                  </span>
-                ))}
-                {settings.customGauges.map((gauge) => (
-                  <span key={gauge.id}>
-                    {gauge.name}: {gauge.icon}{gauge.value}/{gauge.max}
                   </span>
                 ))}
               </div>
