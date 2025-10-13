@@ -79,15 +79,20 @@ const CharacterSettings: React.FC<CharacterSettingsProps> = ({ event }) => {
     const newCharacter: Character = {
       id: `char_${Date.now()}`,
       name: '新しいキャラクター',
-      imageUrl: '',
+      imageUrl: '', // 空文字列のまま（データベースでNULL許可に変更済み）
       position: 'left'
     };
     
     const updatedCharacters = [...event.characters, newCharacter];
-    await dispatch(updateEvent({
-      id: event.id,
-      eventData: { characters: updatedCharacters }
-    }));
+    try {
+      await dispatch(updateEvent({
+        id: event.id,
+        eventData: { characters: updatedCharacters }
+      }));
+    } catch (error) {
+      console.error('Failed to add character:', error);
+      // エラー時の処理を追加
+    }
   };
 
   const removeCharacter = async (characterId: string) => {

@@ -94,7 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               json_build_object(
                 'id', c.id,
                 'name', c.name,
-                'imageUrl', c.image_url,
+                'imageUrl', COALESCE(c.image_url, ''),
                 'position', c.position
               ) ORDER BY c.created_at
             ) FILTER (WHERE c.id IS NOT NULL), 
@@ -198,7 +198,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               json_build_object(
                 'id', c.id,
                 'name', c.name,
-                'imageUrl', c.image_url,
+                'imageUrl', COALESCE(c.image_url, ''),
                 'position', c.position
               ) ORDER BY c.created_at
             ) FILTER (WHERE c.id IS NOT NULL), 
@@ -286,9 +286,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         
         // 新しいキャラクターを追加
         for (const character of characters) {
+          const imageUrl = character.imageUrl && character.imageUrl.trim() !== '' ? character.imageUrl : null;
           await pool.query(
             'INSERT INTO characters (id, event_id, name, image_url, position) VALUES ($1, $2, $3, $4, $5)',
-            [character.id, eventId, character.name, character.imageUrl, character.position]
+            [character.id, eventId, character.name, imageUrl, character.position]
           );
         }
       }
@@ -336,7 +337,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         characters: charactersResult.rows.map(char => ({
           id: char.id,
           name: char.name,
-          imageUrl: char.image_url,
+          imageUrl: char.image_url || '',
           position: char.position
         })),
         headerSettings: headerSettings || {
