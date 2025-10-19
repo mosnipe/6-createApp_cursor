@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch, updateEvent } from '../../store';
 import { Event, Character } from '../../types';
 import { imageService } from '../../services/api';
-import { resizeImageToSquare, isSquareImage, getImageDimensions } from '../../utils/imageUtils';
 
 interface CharacterSettingsProps {
   event: Event;

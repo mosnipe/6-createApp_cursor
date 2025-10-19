@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Event, TextItem, Character, CreateEventRequest, UpdateEventRequest, CreateTextRequest, UpdateTextRequest, ReorderTextsRequest } from '../types';
+import { Event, TextItem, CreateEventRequest, UpdateEventRequest, CreateTextRequest, UpdateTextRequest, ReorderTextsRequest } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.PROD ? 'https://6-create-app-cursor-frontend.vercel.app/api' : 'http://localhost:3001/api');

@@ -52,6 +52,8 @@ export interface HeaderSettings {
     };
   };
   
+  // カスタムゲージ
+  customGauges: CustomGauge[];
 }
 
 export interface CustomGauge {

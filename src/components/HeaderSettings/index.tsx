@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch, updateEvent } from '../../store';
-import { Event, HeaderSettings } from '../../types';
+import { Event, HeaderSettings, CustomGauge } from '../../types';
 
 interface HeaderSettingsProps {
   event: Event;
