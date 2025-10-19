@@ -15,8 +15,15 @@ const app = express();
 
 // ミドルウェア
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app',
+  origin: [
+    'https://6-create-app-cursor-frontend.vercel.app',
+    'https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3001'
+  ],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json({ limit: '10mb' }));

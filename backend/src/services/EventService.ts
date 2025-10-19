@@ -11,7 +11,7 @@ export class EventService {
     `;
     
     const result = await db.query(query, [
-      eventData.title,
+      eventData.title || '',
       eventData.description || null,
       eventData.background_image_id || null
     ]);

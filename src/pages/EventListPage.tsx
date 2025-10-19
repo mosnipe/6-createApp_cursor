@@ -42,7 +42,7 @@ const EventListPage: React.FC = () => {
   const handleQuickCreate = async () => {
     try {
       const result = await dispatch(createEvent({
-        title: '新しいイベント',
+        title: '',
         description: '',
       }));
       
