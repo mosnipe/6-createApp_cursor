@@ -65,6 +65,18 @@ const EventEditPage: React.FC = () => {
   const handleSaveStoryEvent = async () => {
     if (!event) return;
 
+    // タイトル未入力チェック
+    if (!title.trim()) {
+      setSaveMessage({
+        type: 'error',
+        message: 'イベントタイトルを入力してください。'
+      });
+      setTimeout(() => {
+        setSaveMessage(null);
+      }, 3000);
+      return;
+    }
+
     setIsSaving(true);
     setSaveMessage(null);
 
@@ -104,6 +116,18 @@ const EventEditPage: React.FC = () => {
   };
 
   const handleFinishEditing = async () => {
+    // タイトル未入力チェック
+    if (!title.trim()) {
+      setSaveMessage({
+        type: 'error',
+        message: 'イベントタイトルを入力してください。'
+      });
+      setTimeout(() => {
+        setSaveMessage(null);
+      }, 3000);
+      return;
+    }
+
     await handleSaveStoryEvent();
     
     // 保存完了後、イベント一覧に戻る

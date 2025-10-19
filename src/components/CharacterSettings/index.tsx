@@ -19,23 +19,7 @@ const CharacterSettings: React.FC<CharacterSettingsProps> = ({ event }) => {
     setWarnings(prev => ({ ...prev, [characterId]: '' }));
     
     try {
-      // 画像のサイズをチェック
-      const dimensions = await getImageDimensions(file);
-      const isSquare = await isSquareImage(file);
-      
-      let processedFile = file;
-      let warningMessage = '';
-      
-      if (!isSquare) {
-        warningMessage = `画像が正方形ではありません（${dimensions.width}×${dimensions.height}）。正方形にリサイズされます。`;
-        processedFile = await resizeImageToSquare(file, 256);
-      }
-      
-      if (warningMessage) {
-        setWarnings(prev => ({ ...prev, [characterId]: warningMessage }));
-      }
-      
-      const result = await imageService.uploadImage(processedFile);
+      const result = await imageService.uploadImage(file);
       const updatedCharacters = event.characters.map(char =>
         char.id === characterId ? { ...char, imageUrl: result.url } : char
       );

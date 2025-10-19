@@ -27,6 +27,27 @@ const EventListPage: React.FC = () => {
       }));
       
       if (createEvent.fulfilled.match(result)) {
+        // フォームをリセット
+        setNewEventTitle('');
+        setNewEventDescription('');
+        setShowNewEventForm(false);
+        // 直接編集画面に遷移
+        navigate(`/events/${result.payload.id}/edit`);
+      }
+    } catch (error) {
+      console.error('Failed to create event:', error);
+    }
+  };
+
+  const handleQuickCreate = async () => {
+    try {
+      const result = await dispatch(createEvent({
+        title: '新しいイベント',
+        description: '',
+      }));
+      
+      if (createEvent.fulfilled.match(result)) {
+        // 直接編集画面に遷移
         navigate(`/events/${result.payload.id}/edit`);
       }
     } catch (error) {
@@ -66,12 +87,20 @@ const EventListPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-800 font-game">
             イベント一覧
           </h1>
-          <button
-            onClick={() => setShowNewEventForm(true)}
-            className="powerproke-button"
-          >
-            新規作成
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={handleQuickCreate}
+              className="powerproke-button bg-green-600 hover:bg-green-700"
+            >
+              クイック作成
+            </button>
+            <button
+              onClick={() => setShowNewEventForm(true)}
+              className="powerproke-button"
+            >
+              詳細作成
+            </button>
+          </div>
         </div>
 
         {error && (
