@@ -40,22 +40,6 @@ const EventListPage: React.FC = () => {
     }
   };
 
-  const handleQuickCreate = async () => {
-    try {
-      const result = await dispatch(createEvent({
-        title: '',
-        description: '',
-      }));
-      
-      if (createEvent.fulfilled.match(result)) {
-        // 直接編集画面に遷移
-        navigate(`/events/${result.payload.id}/edit`);
-      }
-    } catch (error) {
-      console.error('Failed to create event:', error);
-    }
-  };
-
   const handleEditEvent = (eventId: string) => {
     navigate(`/events/${eventId}/edit`);
   };
@@ -89,12 +73,6 @@ const EventListPage: React.FC = () => {
             イベント一覧
           </h1>
           <div className="flex space-x-3">
-            <button
-              onClick={handleQuickCreate}
-              className="powerproke-button bg-green-600 hover:bg-green-700"
-            >
-              クイック作成
-            </button>
             <button
               onClick={() => setShowNewEventForm(true)}
               className="powerproke-button"

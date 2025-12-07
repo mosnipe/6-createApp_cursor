@@ -17,11 +17,8 @@ const app = express();
 app.use(cors({
   origin: [
     'https://6-create-app-cursor-frontend.vercel.app',
-    'https://6-create-app-cursor-frontend-duq-git-main-mosnipes-projects.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:3001'
+    'http://localhost:3000'
   ],
-  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
