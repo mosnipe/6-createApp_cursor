@@ -83,7 +83,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         file_path VARCHAR(500),
         file_size INTEGER,
         mime_type VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        position VARCHAR(50) CHECK (position IN ('left', 'right', 'center')) NOT NULL DEFAULT 'center',
+        usage VARCHAR(100) NOT NULL
       )
     `);
 

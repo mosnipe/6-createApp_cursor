@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState, AppDispatch, fetchEvents, createEvent } from '../store';
 import { Event } from '../types';
+import EventDisplay from '../components/EventDisplay';
 
 const EventListPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -178,6 +179,12 @@ const EventListPage: React.FC = () => {
                 <p>更新: {formatDate(event.updatedAt)}</p>
                 <p>テキスト数: {event.texts.length}</p>
               </div>
+              <EventDisplay
+                leftImageUrl={event.leftImageUrl}
+                rightImageUrl={event.rightImageUrl}
+                centerImageUrl={event.centerImageUrl}
+                textContent={event.textContent}
+              />
             </div>
           ))}
         </div>

@@ -6,6 +6,7 @@ import TextEditor from '../components/TextEditor';
 import CharacterSettings from '../components/CharacterSettings';
 import HeaderSettingsComponent from '../components/HeaderSettings';
 import PreviewPanel from '../components/PreviewPanel';
+import EventDisplay from '../components/EventDisplay';
 
 const EventEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -162,6 +163,11 @@ const EventEditPage: React.FC = () => {
       </div>
     );
   }
+
+  const leftImageUrl = event.backgroundImage; // 左側画像URL
+  const rightImageUrl = event.headerSettings?.imageUrl; // 右側画像URL
+  const centerImageUrl = event.characters?.[0]?.imageUrl; // 中央画像URL
+  const eventText = event.description; // イベントテキスト
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -324,6 +330,16 @@ const EventEditPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* イベント画像・テキスト表示コンポーネント */}
+        <div className="mt-8">
+          <EventDisplay
+            leftImageUrl={leftImageUrl}
+            rightImageUrl={rightImageUrl}
+            centerImageUrl={centerImageUrl}
+            textContent={eventText}
+          />
+        </div>
       </div>
     </div>
   );

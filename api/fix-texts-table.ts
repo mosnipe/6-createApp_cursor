@@ -46,6 +46,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // インデックス作成（必要に応じて）
     await pool.query('CREATE INDEX IF NOT EXISTS idx_texts_image_id ON texts(image_id)');
 
+    // 左、右、中央画像のリンクカラムを追加
+    await pool.query(`
+      ALTER TABLE texts
+      ADD COLUMN IF NOT EXISTS character_image_left_id UUID REFERENCES images(id),
+      ADD COLUMN IF NOT EXISTS character_image_right_id UUID REFERENCES images(id),
+      ADD COLUMN IF NOT EXISTS event_image_center_id UUID REFERENCES images(id);
+    `);
+
     await pool.end();
 
     console.log('Texts table fix completed successfully!');
