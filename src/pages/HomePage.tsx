@@ -5,11 +5,11 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleNewEvent = () => {
-    navigate('/events');
+    navigate('/event-edit');
   };
 
   const handleEditEvent = () => {
-    navigate('/events');
+    navigate('/event-list');
   };
 
   return (
